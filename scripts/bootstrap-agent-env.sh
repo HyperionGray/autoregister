@@ -14,7 +14,16 @@ if [ ! -d "$PYENV_ROOT" ]; then
 fi
 
 PYENV_BIN="$PYENV_ROOT/bin/pyenv"
-"$PYENV_BIN" install -s "$PYTHON_VERSION"
+if ! "$PYENV_BIN" install -s "$PYTHON_VERSION"; then
+  printf '%s\n' \
+    "Python $PYTHON_VERSION failed to build." \
+    "This bootstrap expects the system packages from .cursor/Dockerfile, or an" \
+    "equivalent host setup that provides OpenSSL, SQLite, bzip2, readline, and" \
+    "other Python 2 build headers." \
+    "For Cursor cloud agents, run the repo through .cursor/environment.json so" \
+    "the image is built before install runs." >&2
+  exit 1
+fi
 
 PYTHON_BIN="$("$PYENV_BIN" prefix "$PYTHON_VERSION")/bin/python2.7"
 "$PYTHON_BIN" -m ensurepip --upgrade >/dev/null 2>&1 || true

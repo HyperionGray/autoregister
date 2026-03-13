@@ -18,7 +18,11 @@ runs `scripts/bootstrap-agent-env.sh` during environment setup.
 
 ## Manual bootstrap
 
-If you need to reproduce the setup in a shell:
+If you need to reproduce the setup in a shell, first make sure the native build
+packages from `.cursor/Dockerfile` are installed on the host. The bootstrap
+script assumes those headers and libraries already exist.
+
+Then run:
 
 ```bash
 bash ./scripts/bootstrap-agent-env.sh
