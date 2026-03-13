@@ -1,5 +1,6 @@
 beautifulsoup4==4.4.1
 fake-factory==0.5.3
+formasaurus==0.2
 lxml==3.4.4
 Pillow==3.0.0
 requests==2.8.1
