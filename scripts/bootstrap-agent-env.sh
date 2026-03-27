@@ -74,7 +74,9 @@ if [ -f "$HOME/.bashrc" ]; then
     *autoregister-agent-env*)
       ;;
     *)
-      printf '\n[ -f "%s" ] && . "%s"\n' "$PROFILE_FILE" "$PROFILE_FILE" >> "$HOME/.bashrc"
+      if ! printf '\n[ -f "%s" ] && . "%s"\n' "$PROFILE_FILE" "$PROFILE_FILE" >> "$HOME/.bashrc"; then
+        echo "Warning: Failed to update .bashrc. You may need to manually source $PROFILE_FILE" >&2
+      fi
       ;;
   esac
 fi
