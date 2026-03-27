@@ -1,5 +1,7 @@
 import unittest
 
+import requests
+
 from registration_form import RegistrationForm
 from registration_form_filler import RegistrationFormFiller
 
@@ -60,6 +62,12 @@ class FakeFormExtractor(object):
         return [(self.form, "registration")]
 
 
+class FailingSession(object):
+
+    def get(self, url, timeout):
+        raise requests.RequestException("boom")
+
+
 class RegistrationFormFillerTests(unittest.TestCase):
 
     def make_filler(self):
@@ -109,6 +117,13 @@ class RegistrationFormFillerTests(unittest.TestCase):
             prepared,
         )
 
+    def test_init_requires_parser_and_extractor_to_be_provided_together(self):
+        with self.assertRaises(ValueError):
+            RegistrationFormFiller(
+                html_in="<form></form>",
+                form_extractor=FakeFormExtractor(FakeForm("/register", [])),
+            )
+
     def test_fill_form_populates_known_field_defaults(self):
         filler = self.make_filler()
         filler.inputs = [
@@ -123,13 +138,25 @@ class RegistrationFormFillerTests(unittest.TestCase):
         filled_inputs = filler.fill_form()
 
         self.assertEqual(
-            "blabhalbhalbhalbahlbah@blah.com",
+            RegistrationFormFiller.DEFAULT_FIELD_VALUES["email"],
             filled_inputs[0]["value"],
         )
         self.assertEqual(
-            "r@nd0mP@ssw0rd",
+            RegistrationFormFiller.DEFAULT_FIELD_VALUES["password_confirmation"],
             filled_inputs[1]["value"],
         )
+
+    def test_url_fetch_errors_raise_descriptive_runtime_error(self):
+        with self.assertRaises(RuntimeError) as raised:
+            RegistrationFormFiller(
+                url="https://example.com/register",
+                request_session=FailingSession(),
+                form_extractor=FakeFormExtractor(FakeForm("/register", [])),
+                html_parser=FakeHtmlParser(FakeTree(FakeForm("/register", []))),
+            )
+
+        self.assertIn("failed to fetch registration form HTML", str(raised.exception))
+        self.assertIn("https://example.com/register", str(raised.exception))
 
 
 if __name__ == "__main__":

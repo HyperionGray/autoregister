@@ -1,5 +1,4 @@
-lk__author__ = 'punk'
-import json
+__author__ = 'punk'
 import requests
 from registration_form import RegistrationForm
 
@@ -31,10 +30,20 @@ class RegistrationFormFiller(object):
         self.html_in = html_in
         self.request_session = request_session or requests
 
+        if (form_extractor is None) != (html_parser is None):
+            raise ValueError(
+                "form_extractor and html_parser must be provided together"
+            )
+
         if self.html_in is None:
             if not url:
                 raise ValueError("html_in or url is required")
-            r = self.request_session.get(url, timeout=30)
+            try:
+                r = self.request_session.get(url, timeout=30)
+            except requests.RequestException as exc:
+                raise RuntimeError(
+                    "failed to fetch registration form HTML from %s" % url
+                ) from exc
             self.html_in = r.text
 
         self.fe = form_extractor or self._load_form_extractor()
@@ -78,6 +87,8 @@ class RegistrationFormFiller(object):
 
         input_dics = []
         self.some_tree = self.tree.getroottree()
+        # Scope input discovery to the extracted form so unrelated page inputs
+        # are not copied into the registration payload.
         for child in self.form.xpath(".//input"):
             input_dic = {}
             for k, v in child.items():
@@ -164,6 +175,8 @@ class RegistrationFormFiller(object):
         return filled_inputs
 
 if __name__ == "__main__":
+
+    import json
 
     ff = RegistrationFormFiller(url="https://auth.getpebble.com/users/sign_up")
     print(json.dumps(ff.fill_form()))
