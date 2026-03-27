@@ -40,6 +40,10 @@ Python 2.7.18
 
 - `formasaurus` is included in `requirements.txt` because it is imported by
   `registration_form_filler.py` but was previously undeclared.
+- `registration_form_filler.py` has been updated to import cleanly on Python 3
+  and to defer optional `formasaurus`/`lxml` imports until HTML parsing is
+  actually needed, which makes the core form-filling logic easier to test in a
+  modern environment.
 - The Selenium dependency is very old (`2.48.0`). Firefox is provided so the
   browser scripts have the expected runtime pieces, but the demo spiders may
   still need code modernization before they work reliably against modern sites
