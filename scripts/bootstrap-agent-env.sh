@@ -10,7 +10,7 @@ export PYENV_ROOT
 export PATH="$PYENV_ROOT/bin:$PATH"
 
 if [ ! -d "$PYENV_ROOT" ]; then
-  git clone --depth 1 https://github.com/pyenv/pyenv.git "$PYENV_ROOT"
+  git clone --depth 1 --single-branch  "$PYENV_ROOT"
 fi
 
 PYENV_BIN="$PYENV_ROOT/bin/pyenv"
